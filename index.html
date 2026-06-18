@@ -4,120 +4,369 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>海淀区党群服务中心阵地地图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  :root{
-    --red:#C0281C;--red2:#a02015;
-    --gold:#C8A84B;--gold-l:#E4C76B;--gold-d:#9A7B2C;
-    --cream:#F5EFD6;--cream2:#EDE0B8;
-    --ink:#2A1A0E;--ink2:#4A3020;
-  }
-  html,body{height:100%;overflow:hidden;background:var(--red)}
-  #app{display:flex;flex-direction:column;height:100vh;background:var(--red);overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-  .page-header{flex-shrink:0;padding:12px 18px 8px;display:flex;justify-content:flex-end}
-  .title-sub{font-size:clamp(11px,3vw,16px);color:rgba(255,255,255,.9);font-weight:600;letter-spacing:3px;text-shadow:1px 1px 4px rgba(0,0,0,.3)}
-  .title-main{font-size:clamp(28px,9vw,54px);font-weight:900;color:#fff;letter-spacing:2px;line-height:1.1;text-shadow:2px 3px 8px rgba(0,0,0,.35);font-family:'STHupo','STXingkai','PingFang SC',sans-serif}
+:root{
+  --red-deep:#7A1010;
+  --red:#B8231A;
+  --red-mid:#C8281E;
+  --gold:#C9A84C;
+  --gold-l:#E8C96A;
+  --gold-xl:#F5E0A0;
+  --gold-d:#8A6820;
+  --parchment:#F7F0DC;
+  --parchment2:#EFE4C4;
+  --parchment3:#E5D5A8;
+  --ink:#1C0E06;
+  --ink2:#3D2510;
+  --ink3:#6B4020;
+}
 
-  .map-area{flex:1;overflow:hidden;padding:0 6px 4px}
-  .map-scroll{width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch}
-  .map-inner{width:100%;display:flex;justify-content:center}
-  svg.district-map{width:100%;max-width:680px;height:auto;display:block;overflow:visible}
+html,body{height:100%;overflow:hidden;background:var(--red-deep)}
 
-  .street-path{stroke:rgba(255,255,255,.65);stroke-width:1;stroke-linejoin:round;transition:filter .15s,opacity .15s}
-  .street-path.clickable{cursor:pointer}
-  .street-path.clickable:hover,.street-path.clickable:active{filter:brightness(1.1) drop-shadow(0 0 5px rgba(200,168,75,.5));opacity:.85}
-  .street-path.no-info{cursor:default}
+#app{
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  background:linear-gradient(160deg,#6A0C0C 0%,#9E1A14 35%,#C0281C 70%,#8B1810 100%);
+  position:relative;
+}
 
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .18s ease}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* 极淡的竖纹肌理 */
+#app::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px,
+    transparent 1px, transparent 28px
+  );
+}
 
-  .card{background:var(--cream);width:100%;max-width:390px;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);border:1.5px solid var(--gold);animation:popIn .25s cubic-bezier(.34,1.4,.64,1);position:relative}
-  @keyframes popIn{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
-  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-d),var(--gold-l),var(--gold-d))}
-  .card-header{background:var(--red);padding:16px 18px 14px;position:relative}
-  .card-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-l),transparent)}
-  .card-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(200,168,75,.2);border:1px solid rgba(200,168,75,.5);color:var(--gold-l);font-size:10px;padding:2px 8px;border-radius:20px;margin-bottom:6px;letter-spacing:.5px}
-  .card-name{font-size:clamp(14px,4vw,17px);font-weight:700;color:#fff;line-height:1.4;padding-right:36px}
-  .card-close{position:absolute;top:13px;right:13px;width:28px;height:28px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50%;color:rgba(255,255,255,.9);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .card-close:hover{background:rgba(255,255,255,.28)}
-  .card-body{padding:4px 0 0}
-  .info-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid rgba(193,168,75,.2)}
-  .info-row:last-child{border-bottom:none}
-  .info-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(192,40,28,.08)}
-  .info-content{flex:1;min-width:0}
-  .info-label{font-size:10px;color:var(--gold-d);font-weight:600;letter-spacing:1px;margin-bottom:2px}
-  .info-value{font-size:13px;color:var(--ink);line-height:1.5;font-weight:500;word-break:break-all}
-  .info-value.phone{color:var(--red);font-size:15px;font-weight:700;letter-spacing:1px}
-  .card-footer{padding:12px 18px 16px}
-  .btn-call{width:100%;background:var(--red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:background .15s}
-  .btn-call:hover{background:var(--red2)}
+/* ── 匾额式标题区 ── */
+.page-header{
+  flex-shrink:0;
+  position:relative;z-index:1;
+  padding:16px 22px 12px;
+  display:flex;justify-content:flex-end;align-items:flex-end;
+}
+
+.title-plaque{
+  text-align:right;
+  position:relative;
+  padding-right:4px;
+}
+
+/* 匾额左侧的金色竖线 */
+.title-plaque::before{
+  content:'';
+  position:absolute;left:-14px;top:6px;bottom:2px;
+  width:2px;
+  background:linear-gradient(180deg,transparent,var(--gold) 20%,var(--gold-l) 50%,var(--gold) 80%,transparent);
+}
+
+.title-eyebrow{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(10px,2.6vw,14px);
+  font-weight:300;
+  color:rgba(255,255,255,0.78);
+  letter-spacing:5px;
+  margin-bottom:4px;
+  display:block;
+}
+
+.title-main-wrap{
+  position:relative;
+  display:inline-block;
+}
+
+.title-main{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(32px,10vw,60px);
+  font-weight:900;
+  color:#fff;
+  letter-spacing:3px;
+  line-height:1.0;
+  display:block;
+  /* 多层文字阴影模拟烫金立体感 */
+  text-shadow:
+    0 1px 0 rgba(200,168,75,0.6),
+    0 2px 0 rgba(150,80,20,0.4),
+    0 4px 12px rgba(0,0,0,0.5),
+    0 8px 30px rgba(0,0,0,0.3);
+}
+
+/* 标题底部金线 */
+.title-gold-rule{
+  display:block;
+  height:1.5px;
+  margin-top:6px;
+  background:linear-gradient(90deg,transparent,var(--gold-d) 5%,var(--gold-l) 40%,var(--gold-xl) 60%,var(--gold) 80%,transparent);
+}
+
+/* ── 地图区域 ── */
+.map-area{
+  flex:1;overflow:hidden;
+  position:relative;z-index:1;
+  padding:0 8px 4px;
+}
+.map-scroll{width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch}
+.map-inner{width:100%;display:flex;justify-content:center}
+
+svg.district-map{width:100%;max-width:680px;height:auto;display:block;overflow:visible}
+
+.street-path{stroke:rgba(255,255,255,.6);stroke-width:0.9;stroke-linejoin:round;transition:filter .18s,opacity .18s}
+.street-path.clickable{cursor:pointer}
+.street-path.clickable:hover,.street-path.clickable:active{
+  filter:brightness(1.12) saturate(1.1) drop-shadow(0 0 6px rgba(232,201,106,.55));
+  opacity:.82;
+}
+.street-path.no-info{cursor:default}
+
+/* ── 遮罩 ── */
+.overlay{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  background:rgba(10,4,2,0.62);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── 卡片 ── */
+.card{
+  width:100%;max-width:400px;
+  background:var(--parchment);
+  border-radius:4px;
+  overflow:hidden;
+  position:relative;
+  animation:popIn .28s cubic-bezier(.22,1.2,.6,1);
+  /* 双层描边：外金内红 */
+  box-shadow:
+    0 0 0 1px var(--gold-d),
+    0 0 0 3px var(--red),
+    0 0 0 4px var(--gold),
+    0 24px 60px rgba(0,0,0,.55),
+    0 8px 20px rgba(0,0,0,.3);
+}
+@keyframes popIn{from{transform:scale(.88) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+
+/* 卡片顶部金色横纹装饰 */
+.card-top-strip{
+  height:4px;
+  background:linear-gradient(90deg,var(--gold-d),var(--gold-l) 30%,var(--gold-xl) 50%,var(--gold-l) 70%,var(--gold-d));
+}
+
+/* 红色标题栏 */
+.card-header{
+  background:linear-gradient(135deg,var(--red-deep) 0%,var(--red) 60%,var(--red-mid) 100%);
+  padding:18px 20px 16px;
+  position:relative;
+}
+
+/* 标题栏底部双线 */
+.card-header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,transparent 2%,var(--gold-d) 5%,var(--gold-l) 30%,var(--gold-xl) 50%,var(--gold-l) 70%,var(--gold-d) 95%,transparent 98%);
+}
+
+.card-seal{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-bottom:8px;
+}
+
+.card-seal-star{
+  font-size:11px;color:var(--gold-l);
+  text-shadow:0 0 6px rgba(232,201,106,.8);
+}
+
+.card-seal-text{
+  font-family:'Noto Serif SC',serif;
+  font-size:10px;font-weight:400;
+  color:rgba(245,224,160,.85);
+  letter-spacing:1.5px;
+}
+
+.card-name{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(15px,4.5vw,18px);
+  font-weight:700;
+  color:#fff;
+  line-height:1.45;
+  padding-right:38px;
+  letter-spacing:0.5px;
+  text-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+
+.card-close{
+  position:absolute;top:15px;right:15px;
+  width:28px;height:28px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:2px;
+  color:rgba(255,255,255,.85);
+  font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Serif SC',serif;
+  transition:background .15s;
+}
+.card-close:hover{background:rgba(255,255,255,.22)}
+
+/* 信息行 */
+.card-body{padding:0}
+
+.info-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 20px;
+  border-bottom:1px solid rgba(139,104,32,.15);
+  position:relative;
+}
+.info-row:last-child{border-bottom:none}
+
+/* 左侧金色细竖线 */
+.info-row::before{
+  content:'';
+  position:absolute;left:20px;top:12px;bottom:12px;
+  width:0;
+}
+
+.info-icon{
+  width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+  color:var(--gold-d);
+  font-size:13px;
+}
+
+.info-divider{
+  width:1px;flex-shrink:0;
+  background:linear-gradient(180deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);
+  align-self:stretch;
+  margin:2px 0;
+  opacity:0.5;
+}
+
+.info-content{flex:1;min-width:0}
+
+.info-label{
+  font-family:'Noto Serif SC',serif;
+  font-size:9.5px;font-weight:400;
+  color:var(--gold-d);
+  letter-spacing:2px;
+  margin-bottom:3px;
+  text-transform:uppercase;
+}
+
+.info-value{
+  font-family:'Noto Serif SC',serif;
+  font-size:13px;font-weight:400;
+  color:var(--ink);line-height:1.6;
+  word-break:break-all;
+}
+
+.info-value.phone{
+  font-size:17px;font-weight:600;
+  color:var(--red);
+  letter-spacing:1.5px;
+  font-family:system-ui,-apple-system,sans-serif;
+}
+
+/* 底部按钮区 */
+.card-footer{
+  padding:14px 20px 18px;
+  background:var(--parchment2);
+  border-top:1px solid rgba(139,104,32,.2);
+}
+
+.btn-call{
+  width:100%;
+  background:linear-gradient(135deg,var(--red-deep),var(--red) 50%,var(--red-mid));
+  color:#fff;
+  border:none;border-radius:2px;
+  padding:13px 20px;
+  font-family:'Noto Serif SC',serif;
+  font-size:15px;font-weight:600;
+  letter-spacing:3px;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:filter .15s;
+  /* 按钮也来一套金色描边 */
+  box-shadow:0 0 0 1px var(--gold-d), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.btn-call::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-l),transparent);
+}
+.btn-call:hover{filter:brightness(1.12)}
+
+/* 卡片底部金色收尾线 */
+.card-bottom-strip{
+  height:3px;
+  background:linear-gradient(90deg,var(--gold-d),var(--gold-l) 30%,var(--gold-xl) 50%,var(--gold-l) 70%,var(--gold-d));
+}
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- 匾额式标题 -->
   <div class="page-header">
-    <div style="text-align:right">
-      <div class="title-sub">海淀区党群服务中心</div>
-      <div class="title-main">阵地地图</div>
+    <div class="title-plaque">
+      <span class="title-eyebrow">海淀区党群服务中心</span>
+      <div class="title-main-wrap">
+        <span class="title-main">阵地地图</span>
+        <span class="title-gold-rule"></span>
+      </div>
     </div>
   </div>
 
+  <!-- 地图 -->
   <div class="map-area">
     <div class="map-scroll">
       <div class="map-inner">
         <svg class="district-map" viewBox="0 0 1053 1084" xmlns="http://www.w3.org/2000/svg">
 
-          <!-- 街道色块 -->
           <path v-for="s in streets" :key="s.id"
             :d="s.d" :fill="s.fill"
             :class="['street-path', s.hasInfo?'clickable':'no-info']"
             @click="s.hasInfo ? open(s.id) : null"
           />
 
-          <!--
-            标注方案：每个标注用 <g> 包裹，整体以区域中心 (cx,cy) 为锚点。
-            在 <g> 内坐标系里：
-              - 红星中心在 (-halfW - 5, 0)，halfW 是文字半宽估算
-              - 文字从 (-halfW + 1, 0) 左端开始，text-anchor=start
-            整体效果：★名字 居中于区域中心
-            halfW = 字数 × fontSize × 0.5 × 0.6  (CJK字符约0.6em per char at SVG)
-            实际按字号13px，每个CJK字约8px宽，估算：字数×8/2 = 字数×4
-          -->
+          <!-- 所有标注：红星 + 名字，整体居中于区域中心 -->
           <g v-for="lb in allLabels" :key="lb.id"
             :transform="`translate(${lb.cx},${lb.cy})`"
             style="pointer-events:none">
-            <!-- 红星：在文字左侧，星右端 = -halfW-3 -->
-            <polygon :points="starPts(-lb.hw - 9, 0, 6, 2.6)" fill="#C0281C"/>
-            <!-- 街道名：从 -halfW+1 开始，居左，这样整体对齐中心 -->
+            <polygon :points="starPts(-lb.hw-9, 0, 6, 2.6)" fill="#C0281C"/>
             <text
-              :x="-lb.hw + 1" y="0"
-              text-anchor="start"
-              dominant-baseline="middle"
+              :x="-lb.hw+1" y="0"
+              text-anchor="start" dominant-baseline="middle"
               font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif"
-              :font-size="lb.fs || 13"
-              font-weight="700"
-              fill="#1a0a06"
+              :font-size="lb.fs||13" font-weight="700" fill="#1a0a06"
             >{{ lb.name }}</text>
           </g>
 
-          <!-- 指南针（左侧中偏下，对应原图位置） -->
-          <circle cx="72" cy="760" r="36" fill="#F5EFD6" stroke="#C8A84B" stroke-width="1.5"/>
-          <circle cx="72" cy="760" r="31" fill="none" stroke="#C8A84B" stroke-width="0.6" stroke-dasharray="3 2.5"/>
-          <polygon points="72,732 76,757 72,761 68,757" fill="#C0281C"/>
-          <polygon points="72,788 76,763 72,761 68,763" fill="#9A7B2C"/>
-          <circle cx="72" cy="760" r="3" fill="#fff" stroke="#C8A84B" stroke-width="1"/>
-          <text x="72" y="724" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#C0281C" font-weight="800" font-family="Arial,sans-serif">N</text>
-          <text x="72" y="796" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#4A3020" font-weight="700" font-family="Arial,sans-serif">S</text>
-          <text x="40"  y="760" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#4A3020" font-weight="700" font-family="Arial,sans-serif">W</text>
-          <text x="104" y="760" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#4A3020" font-weight="700" font-family="Arial,sans-serif">E</text>
+          <!-- 指南针 -->
+          <circle cx="72" cy="760" r="36" fill="#F7F0DC" stroke="#C9A84C" stroke-width="1.5"/>
+          <circle cx="72" cy="760" r="31" fill="none" stroke="#C9A84C" stroke-width="0.6" stroke-dasharray="3 2.5"/>
+          <polygon points="72,732 76,757 72,761 68,757" fill="#B8231A"/>
+          <polygon points="72,788 76,763 72,761 68,763" fill="#8A6820"/>
+          <circle cx="72" cy="760" r="3" fill="#F7F0DC" stroke="#C9A84C" stroke-width="1"/>
+          <text x="72" y="724" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#B8231A" font-weight="800" font-family="'Noto Serif SC',serif">N</text>
+          <text x="72" y="796" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#3D2510" font-weight="600" font-family="'Noto Serif SC',serif">S</text>
+          <text x="40"  y="760" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#3D2510" font-weight="600" font-family="'Noto Serif SC',serif">W</text>
+          <text x="104" y="760" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#3D2510" font-weight="600" font-family="'Noto Serif SC',serif">E</text>
 
-          <!-- 图注（左下角） -->
-          <rect x="18" y="828" width="160" height="46" rx="6" fill="#F5EFD6" stroke="#C8A84B" stroke-width="1.2"/>
-          <text x="30" y="845" dominant-baseline="middle" font-size="13" fill="#4A3020" font-weight="700" font-family="-apple-system,'PingFang SC',sans-serif">图注</text>
-          <polygon :points="starPts(30, 864, 7, 3)" fill="#C0281C"/>
-          <text x="42" y="864" dominant-baseline="middle" font-size="11.5" fill="#2A1A0E" font-weight="500" font-family="-apple-system,'PingFang SC',sans-serif">街镇级党群服务中心</text>
+          <!-- 图注 -->
+          <rect x="18" y="828" width="162" height="48" rx="2" fill="#F7F0DC" stroke="#C9A84C" stroke-width="1.2"/>
+          <rect x="19.6" y="829.6" width="158.8" height="44.8" rx="1.5" fill="none" stroke="#8A6820" stroke-width="0.5"/>
+          <text x="30" y="846" dominant-baseline="middle" font-size="13" fill="#3D2510" font-weight="700" font-family="'Noto Serif SC',serif" letter-spacing="2">图注</text>
+          <polygon :points="starPts(30, 864, 7, 3)" fill="#B8231A"/>
+          <text x="42" y="864" dominant-baseline="middle" font-size="11" fill="#1C0E06" font-weight="400" font-family="'Noto Serif SC',serif" letter-spacing="1">街镇级党群服务中心</text>
 
         </svg>
       </div>
@@ -127,35 +376,43 @@
   <!-- 弹窗 -->
   <div class="overlay" v-if="active" @click.self="close">
     <div class="card">
+      <div class="card-top-strip"></div>
       <div class="card-header">
-        <div class="card-badge">★ 街镇级党群服务中心</div>
+        <div class="card-seal">
+          <span class="card-seal-star">★</span>
+          <span class="card-seal-text">街镇级党群服务中心</span>
+        </div>
         <div class="card-name">{{ active.name }}</div>
         <button class="card-close" @click="close">✕</button>
       </div>
       <div class="card-body">
         <div class="info-row">
-          <div class="info-icon-wrap">📍</div>
+          <div class="info-icon">📍</div>
+          <div class="info-divider"></div>
           <div class="info-content">
             <div class="info-label">服务地址</div>
             <div class="info-value">{{ active.address }}</div>
           </div>
         </div>
         <div class="info-row">
-          <div class="info-icon-wrap">🕐</div>
+          <div class="info-icon">🕐</div>
+          <div class="info-divider"></div>
           <div class="info-content">
             <div class="info-label">营业时间</div>
             <div class="info-value">{{ active.hours }}</div>
           </div>
         </div>
         <div class="info-row">
-          <div class="info-icon-wrap">👤</div>
+          <div class="info-icon">👤</div>
+          <div class="info-divider"></div>
           <div class="info-content">
             <div class="info-label">负责人</div>
             <div class="info-value">{{ active.contact }}</div>
           </div>
         </div>
         <div class="info-row">
-          <div class="info-icon-wrap">📞</div>
+          <div class="info-icon">📞</div>
+          <div class="info-divider"></div>
           <div class="info-content">
             <div class="info-label">联系电话</div>
             <div class="info-value phone">{{ active.phone || '暂无' }}</div>
@@ -163,121 +420,112 @@
         </div>
       </div>
       <div class="card-footer">
-        <button class="btn-call" @click="call(active.phone)">📞 拨打电话</button>
+        <button class="btn-call" @click="call(active.phone)">拨打电话</button>
       </div>
+      <div class="card-bottom-strip"></div>
     </div>
   </div>
+
 </div>
-
 <script>
-const {createApp} = Vue;
+const {createApp}=Vue;
 createApp({
-  data(){
-    return {
-      active: null,
+  data(){return{
+    active:null,
+    streets:[
+      {id:'street-1-wanshoulu',       fill:'#F5EFCB',hasInfo:true, d:'M682 1003H640V1008.5H643.5V1016H663L674 1020H682V1044H745.5V1039H770V982L767 968L758 962L745.5 956H735L686.5 953L682 1003Z'},
+      {id:'street-2-yangfangdian',    fill:'#CCD8E6',hasInfo:true, d:'M745.5 1058.5V1039H769.5V988V984.5V978.5L768 974.5L765.5 969L763 965L757.5 962.5L752.5 959.5H757.5L763 961.5H768L773 962.5H776H780L781.5 965H785.5L791 969L793.5 973.5L799 976.5L809 978.5H824.5L831.5 980.5L835 976.5L840 974.5L844.5 976.5H848.5H852.5L857.5 978.5L868 988V1035H878.5V1042H842.5L840 1046H809H799V1048.5H795V1051.5L791 1053.5H785.5H781.5L776 1058.5L781.5 1060L782.5 1063L780 1065.5H769.5V1070H757.5V1075L752.5 1079L740.5 1082.5V1075L743 1070V1058.5H745.5Z'},
+      {id:'street-3-ganjiakou',       fill:'#F2E5D2',hasInfo:true, d:'M751.5 947V936.5H791.5V889.5V881.5H795H798H805.5H811.5L816 879L822.5 877H830.5L837.5 879H845H850L854.5 881.5H862.5V884.5V889.5V895L864.5 904.5V910.5L866.5 914.5V921.5V929.5V936.5V941.5V949V958V963.5V969V973L864.5 978V985L862.5 983L857.5 980.5L854.5 975.5H850H847H842H837.5L835 978L830.5 980.5L822.5 978H819H814.5H809H803.5L798 975.5L795 973L791.5 969L787.5 966L781.5 963.5L775.5 960.5H769.5H765H760.5L755.5 958L753.5 954L751.5 951V947Z'},
+      {id:'street-4-balizhuang',      fill:'#D3E2CF',hasInfo:true, d:'M703.5 953.5L686 949.5V913L684 875L689 873.5V868.5H703.5H712L723 865.5L725 865L730 870.5H741.5H746.5L747.5 871.5L749 872V875H751.5H753L758.5 873.5L762 872L765 871.5H771L774.5 872L782 875H787.5H792V882.5V937H770H751.5V940V947L753 953.5L757 957.5H753L741.5 953.5H733.5H724H715.5H710.5H703.5Z'},
+      {id:'street-5-zizhuyuan',       fill:'#E8D2D5',hasInfo:true, d:'M748.5 875V871.5L746.5 800.5L764.5 796.5L771 794.5L826.5 767L828 773L829 775.5L830 778L831 784L840 879.5H837L833 878L831 876.5H828H825H823L821 878H819.5L816 879.5L812 881.5H792V875H789H787.5H784L781 874L778.5 873L773.5 871.5H768.5H764.5H762.5L759 873L757 875H753.5H748.5Z'},
+      {id:'street-6-beitaipingzhuang',fill:'#E9D1D1',hasInfo:true, d:'M921.5 736H886.5L896.5 755L898.5 763L901 782.5L904 795.5L921.5 832.5L929 827.5L932.5 830V855.5L981 838.5L975.5 763L921.5 766V736Z'},
+      {id:'street-7-haidian',         fill:'#CCD8E6',hasInfo:true, d:'M778 673L760.5 674.5V696.5L752 699L742 705.5L733.5 715L727 725.5L715 737.5L746.5 800L772 794.5L825.5 766L820.5 745.5L817 732.5L812.5 719L810 692H780.5L778 673Z'},
+      {id:'street-8-zhongguancun',    fill:'#F7F1CD',hasInfo:true, d:'M811.5 702L809.5 686.5L816.5 682.5V678.5H820.5V675H826V669.5L829.5 664L859.5 663L860.5 665.5L877 664L879.5 690.5L882 724.5L886.5 737L896.5 755L898 764.5L826 766L811.5 718.5V702Z'},
+      {id:'street-9-xueyuanlu',       fill:'#CCD8E6',hasInfo:true, d:'M879 691L877 657H869V650L877 639.5L879 633L902 564.5H917.5L921.5 560.5V564.5L924.5 570.5L936.5 564.5L987.5 654L1001.5 686L879 691Z'},
+      {id:'street-10-qinghe',         fill:'#EEE6CF',hasInfo:true, d:'M779.5 391L768.5 400L802 467V471L828 524L838.5 559L873 545.5H908.5V551.5L902.5 564H917L920 559L926 569.5L936 564L850.5 420H845.5H838.5L830 406L818 394L802 400L800 394L790.5 400L779.5 391Z'},
+      {id:'street-11-qinglongqiao',   fill:'#F2EBCE',hasInfo:true, d:'M685 588H663V553.5L658 546.5L656.5 528V513.5H648.5L645 515.5L642.5 517.5L640.5 520H636V526.5H630.5V532L624.5 535.5L622 533.5H617L613 535.5H607.5V526.5H602.5L601 525V520L597.5 517.5V504L601 502.5L600 499L586.5 500L584.5 495.5V491V487L581.5 488.5L580.5 493.5V500H575.5L579 504V520L574 523.5L575.5 532V539V544.5V555V560L579 563L580.5 567L575.5 570V574.5L574 577L570 582.5V588L572 593.5V598.5L568 602V604.5L570 608.5V613.5L572 617L575.5 621.5L572 624.5L575.5 627.5H580.5L581.5 632.5L580.5 638.5L586.5 635.5L592 631.5L595.5 634L601 631.5L605.5 627.5L610 624.5L617 621.5H638H646.5L651 619.5V613.5H658L663 617H671.5L670 619.5L665.5 624.5L660.5 631.5V638.5L658 641.5L654.5 646.5L648.5 652L646.5 660.5L642.5 664V670L645 676.5L648.5 680L652.5 684L654.5 691.5L660.5 695L671.5 707L683.5 709L690 712.5H703L700.5 707L695 699L693.5 691.5L695 680L700.5 674H739.5V660.5H751.5L757.5 654H763.5L766 649L783 646.5L789 638.5H797H809.5V613.5H823L821 584.5L828 582.5L832 580.5L840 574.5L844.5 567L838 559L823 563L800 567L781 570L766 574.5L751.5 580.5L737 582.5H723L703 588H685Z'},
+      {id:'street-12-xiangshan',      fill:'#D2DDCD',hasInfo:true, d:'M571.5 593.5L569.5 590L562.5 588L559 590H551.5L541 592L539.5 588H537L533 592L526 597H519L514 593.5H510L506.5 588L501.5 584H496L492.5 579L487 574.5H483L479 569.5V565.5L474 561.5L467.5 559.5L465 557L461.5 554L452.5 556L444.5 557H437.5L433 556H429L424.5 557V559.5L421 563.5H417.5L414.5 567L413 572L409 576.5V584L406.5 593.5L402.5 601.5H400.5L397 603L391 608.5L384 610.5L382.5 612L379.5 615.5L373 623.5V632L371.5 636H367H360.5H351L344.5 637.5H336.5L326 644.5L318 648L313 654.5L309 660L313 664.5L316.5 669L320.5 676L323.5 682L329.5 696L333.5 699L341.5 696L348.5 688.5L356.5 685L358.5 688.5L360.5 700.5L363 704L361.5 718L363 726H367L381 715L393 702.5V688.5H394.5L400.5 693H406.5L414.5 704V712L421 718H424.5H430L436 720L440.5 726H449.5L456 730H467.5L472 726H479V701L481.5 693H484.5L492.5 696H500H504.5H514H524.5V685V676L526 669L529.5 664.5V657.5L533 654.5L539.5 650.5L550 646L559 644.5L568 641.5L573.5 637.5L581.5 636V632V628.5L578.5 627H573.5L571.5 625L573.5 623.5L576 622L573.5 618.5L571.5 615.5L569.5 612L571.5 608.5L568 606V601.5L571.5 599V593.5Z'},
+      {id:'street-13-xisanqi',        fill:'#E8D2D5',hasInfo:true, d:'M907 398L894 401V432H896.5H902L903.5 427.5H907L911.5 429L934.5 423.5L937.5 430.5L962 423.5L967.5 427.5L985 423.5L982 409.5L991.5 405.5H1000.5L1005.5 394.5H1012V387V371.5L1009.5 374L1005.5 380.5L1000.5 377H985L980 365.5L975 363.5L971.5 365.5H955V377H939.5L925.5 380.5L918.5 382.5V387H913L909 382.5L907 387V398Z'},
+      {id:'street-14-walianwa',       fill:'#CBE2D2',hasInfo:true, d:'M659.5 548.5L656.5 513.5V486L636.5 468L606.5 455L603 433L613.5 426.5L676 423V440.5L716 433L725 481L731.5 523V544L757 539L761.5 575.5L751 582H725L703.5 588H663.5V555L659.5 548.5Z'},
+      {id:'street-15-huayuanlu',      fill:'#DADDD2',hasInfo:true, d:'M1000.5 686.5L879.5 691.5L882 725.5L886 736H922V766.5L1005 762.5L1008.5 745L1010.5 728L1008.5 714.5L1000.5 686.5Z'},
+      {id:'street-16-tiancunlu',      fill:'#F1E5CB',hasInfo:true, d:'M684 866H676L675 887L671.5 888.5V890.5L667 894H662H659H650V896L647.5 902.5L572 905V916.5L567.5 931.5H482L480.5 934L478 940V960L482 962L490.5 965.5L503.5 960H507L509 965.5L516 962L528 960H536L542 962L552 965.5H567.5L569.5 962L572 958.5H587L594.5 956L597 949.5H613V952.5H611V956L613 962H639.5V935.5H686.5V916.5L684 898.5V866Z'},
+      {id:'street-17-shangdi',        fill:'#CEDAE8',hasInfo:true, d:'M746 424.5L717 433L731 525V542.5L757.5 539.5L761.5 576L787.5 569L838 558L828.5 525L803 471.5V467.5L775 414L757.5 420.5L746 424.5Z'},
+      {id:'street-18-shuguang',       fill:'#F5EFCB',hasInfo:true, d:'M746 801.5L714.5 737L693 750.5L684.5 759V770.5L687.5 807V838.5L682.5 860L684.5 874H689V869H709L725 864.5L730.5 871.5H748L746 801.5Z'},
+      {id:'street-19-yongdinlu',      fill:'#E8D2D5',hasInfo:true, d:'M609 962H614.5H639.5V935.5H686V953L682.5 1002.5H639.5V1007.5H643V1015.5H662.5L673.5 1020H682.5V1044.5H633L636 1039.5H617V970L605.5 968L609 962Z'},
+      {id:'street-20-dongshengzhen',  fill:'#D8DBD2',hasInfo:true, d:'M894.5 418.5H883.5L883 420.5L883.5 424.5L886.5 427.5V431V438.5H894.5V441.5L891.5 446.5V454L894.5 460V466.5V475L900.5 472.5V469L903.5 466.5L907 469.5L910.5 472.5H916H924.5V479H929V469.5H942.5L945.5 486L962 479L968.5 507.5L962 512L966.5 523.5L979.5 521.5L995 515.5H1003.5L1015.5 512H1030.5L1052 507.5L1049.5 503.5L1041 498L1038.5 490.5V479L1041 456.5L1030.5 460L1018.5 469.5H1007.5L1003.5 464.5L999 460H979.5V454H975L965.5 435.5V427.5L962 424.5L938.5 431L933.5 424.5L910.5 427.5H902.5V433H894.5V418.5Z'},
+      {id:'street-21-sijiqing',       fill:'#CCD8E6',hasInfo:true, d:'M526.5 669L524 696H490.5L484.5 692L481 694.5L479 698V701.5V706V726.5H471.5L466.5 731H457L448.5 726.5H440.5L437.5 721L428 716.5L420.5 718L418 719L412.5 723V729L415.5 737.5L412.5 746.5V753.5L418 757.5L419.5 762.5H425L428 765.5V770.5L430.5 775L446.5 786.5H452L459 789L463 793.5V803.5L469 806.5L479 816V823.5L483 825.5L494.5 835.5V841L499.5 850.5H503.5V859.5H516.5V868H506V872.5V883.5L503.5 887.5V892.5V896L499.5 894.5V902.5L503.5 906.5V910H497.5V916.5L503.5 918L499.5 927H483V931H567.5L572.5 913.5V904L646 902.5L651.5 894.5H668.5L671.5 887.5H673.5L676 865H684L681.5 862.5L684 856L687.5 835.5V813V798.5L684 781.5V761L687.5 756L698.5 746.5L714.5 736L706 725L701.5 714L693 711.5H687.5L671.5 707.5L668.5 703.5L662 696L653.5 692L651.5 684L646 679L641 666L639 653H635.5L629.5 655L623 660.5V672H617V666.5H613.5L612 679L606 680.5L592.5 684L588.5 688L592.5 696L578 703.5L574.5 692L583 688V680.5L592.5 679L588.5 658L592.5 647.5L595.5 635L592.5 631.5L581 638H574.5L562 643L545.5 647.5L529.5 658V664.5L526.5 669Z'},
+      {id:'street-22-xibeiwang',      fill:'#E7D0D8',hasInfo:true, d:'M587.5 500.5L583.5 487.5H580.5V492.5V500.5H574.5L578.5 504L580.5 520.5L574.5 523.5L575.5 535.5V559.5L580.5 564V568.5H574.5V575.5L572 578.5L570 584.5V589.5H563.5H559H553.5L547.5 591.5H541.5L537 589.5L526 597H521L515 593.5H510L508 589.5L502.5 584.5H499L494.5 581L490.5 575.5H484L480.5 571.5V566L478.5 561H469.5L462.5 554.5V538.5L478.5 533.5L490.5 542L496.5 535.5L510 533.5L515 523.5V520.5L511.5 514L506 509.5L502.5 504L499 498L492.5 490L499 487.5L496.5 481H510L506 472L526 464.5V461L533 458.5V450L537 447.5V423.5L518 426.5V413.5L496.5 418L490.5 399.5L480.5 403.5L477 394H462.5V390.5H455V378.5H437.5L435.5 366H441.5V336L448.5 328.5H459.5L462.5 333L500.5 310L510 320L520.5 312.5L537 267.5L531 259.5L529 251H533V246.5L531 240.5L539 243.5H543V253H547.5V243.5L553 240.5L564 232L568.5 225V214L573 205.5H577.5L579.5 210.5H585L589.5 215L594.5 219.5L607 215H616L622.5 219.5L626.5 222.5L632.5 219.5L637.5 214V206.5L632.5 201V195.5L634.5 190V195.5H639H646.5L649 199L651.5 205.5L649 210.5L653 216.5L651.5 222.5V233.5L662 234.5V246.5H646.5V256.5L653 253L655.5 262.5L680 259.5V271L701.5 320L732.5 307L775 413.5L723.5 431.5L676.5 440V423.5L614.5 426.5L601 434L606.5 454.5L635.5 467.5L655.5 487.5V513H649L639 520.5H635.5V528L629.5 525.5V533.5L625.5 535.5L621.5 533.5H616.5V535.5H609V528L601 525.5V518.5H597V504H601V500.5H587.5Z'},
+      {id:'street-23-wenquanzhen',    fill:'#CCD8E6',hasInfo:true, d:'M303 356L275.5 359.5L274.5 365.5L270.5 368.5V371L275.5 377.5L278.5 382.5L293.5 393V423.5V429.5L290 427.5V436.5L288 442.5L290 448.5L293.5 450.5L290 456L278.5 459L270.5 465.5V477L274.5 487L275.5 498.5L278.5 504.5L277 508L274.5 511L273 520L278.5 524L284.5 532.5L300 547.5H308L317.5 550.5L328 554L332 558.5L337.5 562L348.5 571.5L353.5 586H359V590.5L366.5 594.5L368.5 601H373.5L382.5 611L391 608L399.5 601H403.5L407 590.5L409 575H412.5V568.5L417 562H422L425 556.5L432 554L442 558.5L463 554V539L479.5 532.5L491.5 541.5L496.5 536.5L510.5 532.5L515 524L510.5 514.5L506 509.5L491.5 491.5L499 487L496.5 480L510.5 482.5L506 472.5L526 465.5V459H532.5V450.5L538 446.5V423.5L517.5 427.5V413.5L496.5 416.5L491.5 398L479.5 403.5L476 395.5H465L463 390.5H455V379H437L435.5 365.5H430.5L428.5 377.5H416V393H394V398L383.5 395.5V387H373L370 365.5H306L303 356Z'},
+      {id:'street-24-sujiatuo',       fill:'#D1DFCE',hasInfo:true, d:'M291 154L257 157.5L251.5 182H241.5L236.5 179L192.5 182L172.5 172L165 179H157.5L155 172L148 165L142 157.5L136.5 159.5L121 165L108 163L100 165V174.5L88 182H81.5H75.5V194.5L71 200V206.5L63 212.5L60.5 224L51.5 228H45.5L41 231.5V242L37 244.5L27 252L15.5 259.5V270.5L7.5 278.5L0.5 286.5V291V299L7.5 304L11 315L18.5 327.5L27 336L30 342H37L45.5 351.5L48 359.5V369.5L51.5 378H57L60.5 386L65.5 390.5L67 396L65.5 401.5L63 408V413.5L60.5 417.5L57 422V431L60.5 436V442V445.5L65.5 452L75.5 474.5L76 480.5V488.5L81.5 497.5L85.5 501.5H93.5L100 508L106.5 514L116 511.5H126H137.5L142 505L150.5 501.5L157.5 505L165 508H176H187L201.5 505L212.5 511.5L219 517H229L244.5 514H251.5L264.5 517L271 520.5L275 514L278.5 505L275 497.5V488.5L271 476.5L268.5 466L275 461.5L289 456.5L292 452L289 448V436V427L294.5 431L292 394L278.5 384.5L268.5 369.5L275 366V359.5L302.5 356L305 364.5H368.5L372.5 386L384 384.5V394L394.5 398V394H415.5V378H427L430.5 366H441V336L448 327.5L452 318L448 311.5L439 294.5H433.5L430.5 286.5L433.5 284L427 270.5L402.5 256.5L391 221H379.5L370.5 204L352.5 165L345.5 149H333L313.5 154H291Z'},
+      {id:'street-25-shangzhuangzhen',fill:'#F5EFCB',hasInfo:true, d:'M434.5 11V21.5L429 22.5L404.5 11L408 17.5V31L403.5 32V35L399 37.5L400.5 54.5H389.5V65.5H379L377 73H362.5L360 74.5V85L350.5 84V87L354.5 90.5L356.5 97L363.5 102L369.5 113.5L374 132.5L360 130.5L368.5 141V145L356.5 143.5L345.5 149L379.5 221.5H391.5L402.5 256.5L427.5 270.5L433.5 284L430.5 286.5L433.5 294.5H439L452 318L447.5 328.5H459L463.5 333L500 310L510 320.5L520.5 312L536.5 267L532 261L530 258.5L528.5 250H533V245.5L530 240L534 241L542.5 243.5V252.5H547.5V243.5L554.5 238L563.5 230.5L569 222.5V212.5L572.5 205.5H575.5L582 208.5V200H588.5V191H592.5L588.5 166H595.5V158.5L600 155.5V127.5L604.5 97.5H588.5H569L559.5 94L542.5 87L530.5 82.5L527.5 87L520.5 79H511.5L508.5 73H502L496.5 79H484.5L476.5 65.5V40L465 26.5V0.5H454.5V3.5H440.5V7.5L434.5 11Z'},
+      {id:'street-beixiaguan',fill:'#D3E1D4',hasInfo:false,d:'M898 764.5L827 766L829 776L831 782.5L839.5 879H849L855.5 882V879L853 874.5L848 871L849 864.5L861 857.5L869 860L880.5 862L903.5 860H910.5L916.5 862L921 860L918 849.5V836L921 832L910.5 810L903.5 790.5L898 764.5Z'},
+      {id:'street-haidianzhen',fill:'#E7D1DC',hasInfo:false,d:'M727.5 724.5L715.5 735.5L714.5 736.5L708 728L703 713L700 705.5L695 699L693 692L695 680L700 674.5H739.5V660H752L754.5 661.5L760 664H762V657L765.5 658.5V664L772 666.5V673L760 674.5V697.5H757L741.5 704L727.5 724.5Z'},
+      {id:'street-1',fill:'#E5D2D8',hasInfo:false,d:'M583.5 688.5V681L593 678.5L589 657.5L595.5 634L603.5 630L609.5 624.5L617.5 621H646.5L650.5 619.5V613.5H658.5L663 617.5H671.5L660.5 630V638L649 652L646.5 661L642.5 663L641 665.5L639.5 653.5H638L629.5 655.5L623.5 661V671H617.5V665.5H614L611 678.5L593 685L589 688.5L593 695.5L578.5 703.5L574.5 692.5L583.5 688.5Z'},
+      {id:'street-2',fill:'#D2DCD1',hasInfo:false,d:'M761.5 664L752.5 660.5L757.5 653.5H763.5L766 649L783 646.5L789 638H797.5V641.5L801 643.5L810.5 641.5L813 645.5L816 643.5L821 644L825 649.5V656L826.5 662L829 665L826 669.5V675H821L820.5 678.5L816.5 679V682.5L809.5 687V692H780.5L778.5 673H772V666.5L765.5 664V658.5L761.5 657V664Z'},
+      {id:'street-3',fill:'#F1E5CF',hasInfo:false,d:'M832.5 580.5L821 585L823 613.5H809.5L809 638H797.5V641.5L801 643.5L810.5 641.5L813 645.5L816 643.5L821.5 644.5L825 649.5V656L826 662L829.5 664.5L859 662.5V655.5L862 652L868 642.5V604L866 602.5L849.5 586.5L850.5 585L854 579.5L845 567L839.5 575.5L832.5 580.5Z'},
+      {id:'street-4',fill:'#D1DFCE',hasInfo:false,d:'M873.5 545.5L838.5 559L854 579.5L849.5 586.5L868 604V643L859 655.5V663L860.5 666L877 664.5L876.5 657.5L869 657V650L870 649L877 638L902 565L908.5 551.5V545.5H873.5Z'},
+      {id:'street-5',fill:'#E8D2D5',hasInfo:false,d:'M860.5 410L851 418.5L850.5 420L916.5 531L966 523L962 512L968.5 507.5L962 479L945.5 486L942.5 470L929 469.5V479H924.5V472.5H910.5L903.5 466.5L901 469.5V472.5L894 475L894.5 460L892.5 457L891 446.5L894 441V439H886.5V427.5L883 425V418.5L882 412.5L880.5 405.5H876.5L869.5 407L860.5 410Z'},
+    ],
 
-      streets:[
-        {id:'street-1-wanshoulu',       fill:'#F5EFCB',hasInfo:true, d:'M682 1003H640V1008.5H643.5V1016H663L674 1020H682V1044H745.5V1039H770V982L767 968L758 962L745.5 956H735L686.5 953L682 1003Z'},
-        {id:'street-2-yangfangdian',    fill:'#CCD8E6',hasInfo:true, d:'M745.5 1058.5V1039H769.5V988V984.5V978.5L768 974.5L765.5 969L763 965L757.5 962.5L752.5 959.5H757.5L763 961.5H768L773 962.5H776H780L781.5 965H785.5L791 969L793.5 973.5L799 976.5L809 978.5H824.5L831.5 980.5L835 976.5L840 974.5L844.5 976.5H848.5H852.5L857.5 978.5L868 988V1035H878.5V1042H842.5L840 1046H809H799V1048.5H795V1051.5L791 1053.5H785.5H781.5L776 1058.5L781.5 1060L782.5 1063L780 1065.5H769.5V1070H757.5V1075L752.5 1079L740.5 1082.5V1075L743 1070V1058.5H745.5Z'},
-        {id:'street-3-ganjiakou',       fill:'#F2E5D2',hasInfo:true, d:'M751.5 947V936.5H791.5V889.5V881.5H795H798H805.5H811.5L816 879L822.5 877H830.5L837.5 879H845H850L854.5 881.5H862.5V884.5V889.5V895L864.5 904.5V910.5L866.5 914.5V921.5V929.5V936.5V941.5V949V958V963.5V969V973L864.5 978V985L862.5 983L857.5 980.5L854.5 975.5H850H847H842H837.5L835 978L830.5 980.5L822.5 978H819H814.5H809H803.5L798 975.5L795 973L791.5 969L787.5 966L781.5 963.5L775.5 960.5H769.5H765H760.5L755.5 958L753.5 954L751.5 951V947Z'},
-        {id:'street-4-balizhuang',      fill:'#D3E2CF',hasInfo:true, d:'M703.5 953.5L686 949.5V913L684 875L689 873.5V868.5H703.5H712L723 865.5L725 865L730 870.5H741.5H746.5L747.5 871.5L749 872V875H751.5H753L758.5 873.5L762 872L765 871.5H771L774.5 872L782 875H787.5H792V882.5V937H770H751.5V940V947L753 953.5L757 957.5H753L741.5 953.5H733.5H724H715.5H710.5H703.5Z'},
-        {id:'street-5-zizhuyuan',       fill:'#E8D2D5',hasInfo:true, d:'M748.5 875V871.5L746.5 800.5L764.5 796.5L771 794.5L826.5 767L828 773L829 775.5L830 778L831 784L840 879.5H837L833 878L831 876.5H828H825H823L821 878H819.5L816 879.5L812 881.5H792V875H789H787.5H784L781 874L778.5 873L773.5 871.5H768.5H764.5H762.5L759 873L757 875H753.5H748.5Z'},
-        {id:'street-6-beitaipingzhuang',fill:'#E9D1D1',hasInfo:true, d:'M921.5 736H886.5L896.5 755L898.5 763L901 782.5L904 795.5L921.5 832.5L929 827.5L932.5 830V855.5L981 838.5L975.5 763L921.5 766V736Z'},
-        {id:'street-7-haidian',         fill:'#CCD8E6',hasInfo:true, d:'M778 673L760.5 674.5V696.5L752 699L742 705.5L733.5 715L727 725.5L715 737.5L746.5 800L772 794.5L825.5 766L820.5 745.5L817 732.5L812.5 719L810 692H780.5L778 673Z'},
-        {id:'street-8-zhongguancun',    fill:'#F7F1CD',hasInfo:true, d:'M811.5 702L809.5 686.5L816.5 682.5V678.5H820.5V675H826V669.5L829.5 664L859.5 663L860.5 665.5L877 664L879.5 690.5L882 724.5L886.5 737L896.5 755L898 764.5L826 766L811.5 718.5V702Z'},
-        {id:'street-9-xueyuanlu',       fill:'#CCD8E6',hasInfo:true, d:'M879 691L877 657H869V650L877 639.5L879 633L902 564.5H917.5L921.5 560.5V564.5L924.5 570.5L936.5 564.5L987.5 654L1001.5 686L879 691Z'},
-        {id:'street-10-qinghe',         fill:'#EEE6CF',hasInfo:true, d:'M779.5 391L768.5 400L802 467V471L828 524L838.5 559L873 545.5H908.5V551.5L902.5 564H917L920 559L926 569.5L936 564L850.5 420H845.5H838.5L830 406L818 394L802 400L800 394L790.5 400L779.5 391Z'},
-        {id:'street-11-qinglongqiao',   fill:'#F2EBCE',hasInfo:true, d:'M685 588H663V553.5L658 546.5L656.5 528V513.5H648.5L645 515.5L642.5 517.5L640.5 520H636V526.5H630.5V532L624.5 535.5L622 533.5H617L613 535.5H607.5V526.5H602.5L601 525V520L597.5 517.5V504L601 502.5L600 499L586.5 500L584.5 495.5V491V487L581.5 488.5L580.5 493.5V500H575.5L579 504V520L574 523.5L575.5 532V539V544.5V555V560L579 563L580.5 567L575.5 570V574.5L574 577L570 582.5V588L572 593.5V598.5L568 602V604.5L570 608.5V613.5L572 617L575.5 621.5L572 624.5L575.5 627.5H580.5L581.5 632.5L580.5 638.5L586.5 635.5L592 631.5L595.5 634L601 631.5L605.5 627.5L610 624.5L617 621.5H638H646.5L651 619.5V613.5H658L663 617H671.5L670 619.5L665.5 624.5L660.5 631.5V638.5L658 641.5L654.5 646.5L648.5 652L646.5 660.5L642.5 664V670L645 676.5L648.5 680L652.5 684L654.5 691.5L660.5 695L671.5 707L683.5 709L690 712.5H703L700.5 707L695 699L693.5 691.5L695 680L700.5 674H739.5V660.5H751.5L757.5 654H763.5L766 649L783 646.5L789 638.5H797H809.5V613.5H823L821 584.5L828 582.5L832 580.5L840 574.5L844.5 567L838 559L823 563L800 567L781 570L766 574.5L751.5 580.5L737 582.5H723L703 588H685Z'},
-        {id:'street-12-xiangshan',      fill:'#D2DDCD',hasInfo:true, d:'M571.5 593.5L569.5 590L562.5 588L559 590H551.5L541 592L539.5 588H537L533 592L526 597H519L514 593.5H510L506.5 588L501.5 584H496L492.5 579L487 574.5H483L479 569.5V565.5L474 561.5L467.5 559.5L465 557L461.5 554L452.5 556L444.5 557H437.5L433 556H429L424.5 557V559.5L421 563.5H417.5L414.5 567L413 572L409 576.5V584L406.5 593.5L402.5 601.5H400.5L397 603L391 608.5L384 610.5L382.5 612L379.5 615.5L373 623.5V632L371.5 636H367H360.5H351L344.5 637.5H336.5L326 644.5L318 648L313 654.5L309 660L313 664.5L316.5 669L320.5 676L323.5 682L329.5 696L333.5 699L341.5 696L348.5 688.5L356.5 685L358.5 688.5L360.5 700.5L363 704L361.5 718L363 726H367L381 715L393 702.5V688.5H394.5L400.5 693H406.5L414.5 704V712L421 718H424.5H430L436 720L440.5 726H449.5L456 730H467.5L472 726H479V701L481.5 693H484.5L492.5 696H500H504.5H514H524.5V685V676L526 669L529.5 664.5V657.5L533 654.5L539.5 650.5L550 646L559 644.5L568 641.5L573.5 637.5L581.5 636V632V628.5L578.5 627H573.5L571.5 625L573.5 623.5L576 622L573.5 618.5L571.5 615.5L569.5 612L571.5 608.5L568 606V601.5L571.5 599V593.5Z'},
-        {id:'street-13-xisanqi',        fill:'#E8D2D5',hasInfo:true, d:'M907 398L894 401V432H896.5H902L903.5 427.5H907L911.5 429L934.5 423.5L937.5 430.5L962 423.5L967.5 427.5L985 423.5L982 409.5L991.5 405.5H1000.5L1005.5 394.5H1012V387V371.5L1009.5 374L1005.5 380.5L1000.5 377H985L980 365.5L975 363.5L971.5 365.5H955V377H939.5L925.5 380.5L918.5 382.5V387H913L909 382.5L907 387V398Z'},
-        {id:'street-14-walianwa',       fill:'#CBE2D2',hasInfo:true, d:'M659.5 548.5L656.5 513.5V486L636.5 468L606.5 455L603 433L613.5 426.5L676 423V440.5L716 433L725 481L731.5 523V544L757 539L761.5 575.5L751 582H725L703.5 588H663.5V555L659.5 548.5Z'},
-        {id:'street-15-huayuanlu',      fill:'#DADDD2',hasInfo:true, d:'M1000.5 686.5L879.5 691.5L882 725.5L886 736H922V766.5L1005 762.5L1008.5 745L1010.5 728L1008.5 714.5L1000.5 686.5Z'},
-        {id:'street-16-tiancunlu',      fill:'#F1E5CB',hasInfo:true, d:'M684 866H676L675 887L671.5 888.5V890.5L667 894H662H659H650V896L647.5 902.5L572 905V916.5L567.5 931.5H482L480.5 934L478 940V960L482 962L490.5 965.5L503.5 960H507L509 965.5L516 962L528 960H536L542 962L552 965.5H567.5L569.5 962L572 958.5H587L594.5 956L597 949.5H613V952.5H611V956L613 962H639.5V935.5H686.5V916.5L684 898.5V866Z'},
-        {id:'street-17-shangdi',        fill:'#CEDAE8',hasInfo:true, d:'M746 424.5L717 433L731 525V542.5L757.5 539.5L761.5 576L787.5 569L838 558L828.5 525L803 471.5V467.5L775 414L757.5 420.5L746 424.5Z'},
-        {id:'street-18-shuguang',       fill:'#F5EFCB',hasInfo:true, d:'M746 801.5L714.5 737L693 750.5L684.5 759V770.5L687.5 807V838.5L682.5 860L684.5 874H689V869H709L725 864.5L730.5 871.5H748L746 801.5Z'},
-        {id:'street-19-yongdinlu',      fill:'#E8D2D5',hasInfo:true, d:'M609 962H614.5H639.5V935.5H686V953L682.5 1002.5H639.5V1007.5H643V1015.5H662.5L673.5 1020H682.5V1044.5H633L636 1039.5H617V970L605.5 968L609 962Z'},
-        {id:'street-20-dongshengzhen',  fill:'#D8DBD2',hasInfo:true, d:'M894.5 418.5H883.5L883 420.5L883.5 424.5L886.5 427.5V431V438.5H894.5V441.5L891.5 446.5V454L894.5 460V466.5V475L900.5 472.5V469L903.5 466.5L907 469.5L910.5 472.5H916H924.5V479H929V469.5H942.5L945.5 486L962 479L968.5 507.5L962 512L966.5 523.5L979.5 521.5L995 515.5H1003.5L1015.5 512H1030.5L1052 507.5L1049.5 503.5L1041 498L1038.5 490.5V479L1041 456.5L1030.5 460L1018.5 469.5H1007.5L1003.5 464.5L999 460H979.5V454H975L965.5 435.5V427.5L962 424.5L938.5 431L933.5 424.5L910.5 427.5H902.5V433H894.5V418.5Z'},
-        {id:'street-21-sijiqing',       fill:'#CCD8E6',hasInfo:true, d:'M526.5 669L524 696H490.5L484.5 692L481 694.5L479 698V701.5V706V726.5H471.5L466.5 731H457L448.5 726.5H440.5L437.5 721L428 716.5L420.5 718L418 719L412.5 723V729L415.5 737.5L412.5 746.5V753.5L418 757.5L419.5 762.5H425L428 765.5V770.5L430.5 775L446.5 786.5H452L459 789L463 793.5V803.5L469 806.5L479 816V823.5L483 825.5L494.5 835.5V841L499.5 850.5H503.5V859.5H516.5V868H506V872.5V883.5L503.5 887.5V892.5V896L499.5 894.5V902.5L503.5 906.5V910H497.5V916.5L503.5 918L499.5 927H483V931H567.5L572.5 913.5V904L646 902.5L651.5 894.5H668.5L671.5 887.5H673.5L676 865H684L681.5 862.5L684 856L687.5 835.5V813V798.5L684 781.5V761L687.5 756L698.5 746.5L714.5 736L706 725L701.5 714L693 711.5H687.5L671.5 707.5L668.5 703.5L662 696L653.5 692L651.5 684L646 679L641 666L639 653H635.5L629.5 655L623 660.5V672H617V666.5H613.5L612 679L606 680.5L592.5 684L588.5 688L592.5 696L578 703.5L574.5 692L583 688V680.5L592.5 679L588.5 658L592.5 647.5L595.5 635L592.5 631.5L581 638H574.5L562 643L545.5 647.5L529.5 658V664.5L526.5 669Z'},
-        {id:'street-22-xibeiwang',      fill:'#E7D0D8',hasInfo:true, d:'M587.5 500.5L583.5 487.5H580.5V492.5V500.5H574.5L578.5 504L580.5 520.5L574.5 523.5L575.5 535.5V559.5L580.5 564V568.5H574.5V575.5L572 578.5L570 584.5V589.5H563.5H559H553.5L547.5 591.5H541.5L537 589.5L526 597H521L515 593.5H510L508 589.5L502.5 584.5H499L494.5 581L490.5 575.5H484L480.5 571.5V566L478.5 561H469.5L462.5 554.5V538.5L478.5 533.5L490.5 542L496.5 535.5L510 533.5L515 523.5V520.5L511.5 514L506 509.5L502.5 504L499 498L492.5 490L499 487.5L496.5 481H510L506 472L526 464.5V461L533 458.5V450L537 447.5V423.5L518 426.5V413.5L496.5 418L490.5 399.5L480.5 403.5L477 394H462.5V390.5H455V378.5H437.5L435.5 366H441.5V336L448.5 328.5H459.5L462.5 333L500.5 310L510 320L520.5 312.5L537 267.5L531 259.5L529 251H533V246.5L531 240.5L539 243.5H543V253H547.5V243.5L553 240.5L564 232L568.5 225V214L573 205.5H577.5L579.5 210.5H585L589.5 215L594.5 219.5L607 215H616L622.5 219.5L626.5 222.5L632.5 219.5L637.5 214V206.5L632.5 201V195.5L634.5 190V195.5H639H646.5L649 199L651.5 205.5L649 210.5L653 216.5L651.5 222.5V233.5L662 234.5V246.5H646.5V256.5L653 253L655.5 262.5L680 259.5V271L701.5 320L732.5 307L775 413.5L723.5 431.5L676.5 440V423.5L614.5 426.5L601 434L606.5 454.5L635.5 467.5L655.5 487.5V513H649L639 520.5H635.5V528L629.5 525.5V533.5L625.5 535.5L621.5 533.5H616.5V535.5H609V528L601 525.5V518.5H597V504H601V500.5H587.5Z'},
-        {id:'street-23-wenquanzhen',    fill:'#CCD8E6',hasInfo:true, d:'M303 356L275.5 359.5L274.5 365.5L270.5 368.5V371L275.5 377.5L278.5 382.5L293.5 393V423.5V429.5L290 427.5V436.5L288 442.5L290 448.5L293.5 450.5L290 456L278.5 459L270.5 465.5V477L274.5 487L275.5 498.5L278.5 504.5L277 508L274.5 511L273 520L278.5 524L284.5 532.5L300 547.5H308L317.5 550.5L328 554L332 558.5L337.5 562L348.5 571.5L353.5 586H359V590.5L366.5 594.5L368.5 601H373.5L382.5 611L391 608L399.5 601H403.5L407 590.5L409 575H412.5V568.5L417 562H422L425 556.5L432 554L442 558.5L463 554V539L479.5 532.5L491.5 541.5L496.5 536.5L510.5 532.5L515 524L510.5 514.5L506 509.5L491.5 491.5L499 487L496.5 480L510.5 482.5L506 472.5L526 465.5V459H532.5V450.5L538 446.5V423.5L517.5 427.5V413.5L496.5 416.5L491.5 398L479.5 403.5L476 395.5H465L463 390.5H455V379H437L435.5 365.5H430.5L428.5 377.5H416V393H394V398L383.5 395.5V387H373L370 365.5H306L303 356Z'},
-        {id:'street-24-sujiatuo',       fill:'#D1DFCE',hasInfo:true, d:'M291 154L257 157.5L251.5 182H241.5L236.5 179L192.5 182L172.5 172L165 179H157.5L155 172L148 165L142 157.5L136.5 159.5L121 165L108 163L100 165V174.5L88 182H81.5H75.5V194.5L71 200V206.5L63 212.5L60.5 224L51.5 228H45.5L41 231.5V242L37 244.5L27 252L15.5 259.5V270.5L7.5 278.5L0.5 286.5V291V299L7.5 304L11 315L18.5 327.5L27 336L30 342H37L45.5 351.5L48 359.5V369.5L51.5 378H57L60.5 386L65.5 390.5L67 396L65.5 401.5L63 408V413.5L60.5 417.5L57 422V431L60.5 436V442V445.5L65.5 452L75.5 474.5L76 480.5V488.5L81.5 497.5L85.5 501.5H93.5L100 508L106.5 514L116 511.5H126H137.5L142 505L150.5 501.5L157.5 505L165 508H176H187L201.5 505L212.5 511.5L219 517H229L244.5 514H251.5L264.5 517L271 520.5L275 514L278.5 505L275 497.5V488.5L271 476.5L268.5 466L275 461.5L289 456.5L292 452L289 448V436V427L294.5 431L292 394L278.5 384.5L268.5 369.5L275 366V359.5L302.5 356L305 364.5H368.5L372.5 386L384 384.5V394L394.5 398V394H415.5V378H427L430.5 366H441V336L448 327.5L452 318L448 311.5L439 294.5H433.5L430.5 286.5L433.5 284L427 270.5L402.5 256.5L391 221H379.5L370.5 204L352.5 165L345.5 149H333L313.5 154H291Z'},
-        {id:'street-25-shangzhuangzhen',fill:'#F5EFCB',hasInfo:true, d:'M434.5 11V21.5L429 22.5L404.5 11L408 17.5V31L403.5 32V35L399 37.5L400.5 54.5H389.5V65.5H379L377 73H362.5L360 74.5V85L350.5 84V87L354.5 90.5L356.5 97L363.5 102L369.5 113.5L374 132.5L360 130.5L368.5 141V145L356.5 143.5L345.5 149L379.5 221.5H391.5L402.5 256.5L427.5 270.5L433.5 284L430.5 286.5L433.5 294.5H439L452 318L447.5 328.5H459L463.5 333L500 310L510 320.5L520.5 312L536.5 267L532 261L530 258.5L528.5 250H533V245.5L530 240L534 241L542.5 243.5V252.5H547.5V243.5L554.5 238L563.5 230.5L569 222.5V212.5L572.5 205.5H575.5L582 208.5V200H588.5V191H592.5L588.5 166H595.5V158.5L600 155.5V127.5L604.5 97.5H588.5H569L559.5 94L542.5 87L530.5 82.5L527.5 87L520.5 79H511.5L508.5 73H502L496.5 79H484.5L476.5 65.5V40L465 26.5V0.5H454.5V3.5H440.5V7.5L434.5 11Z'},
-        {id:'street-beixiaguan',fill:'#D3E1D4',hasInfo:false,d:'M898 764.5L827 766L829 776L831 782.5L839.5 879H849L855.5 882V879L853 874.5L848 871L849 864.5L861 857.5L869 860L880.5 862L903.5 860H910.5L916.5 862L921 860L918 849.5V836L921 832L910.5 810L903.5 790.5L898 764.5Z'},
-        {id:'street-haidianzhen',fill:'#E7D1DC',hasInfo:false,d:'M727.5 724.5L715.5 735.5L714.5 736.5L708 728L703 713L700 705.5L695 699L693 692L695 680L700 674.5H739.5V660H752L754.5 661.5L760 664H762V657L765.5 658.5V664L772 666.5V673L760 674.5V697.5H757L741.5 704L727.5 724.5Z'},
-        {id:'street-1',fill:'#E5D2D8',hasInfo:false,d:'M583.5 688.5V681L593 678.5L589 657.5L595.5 634L603.5 630L609.5 624.5L617.5 621H646.5L650.5 619.5V613.5H658.5L663 617.5H671.5L660.5 630V638L649 652L646.5 661L642.5 663L641 665.5L639.5 653.5H638L629.5 655.5L623.5 661V671H617.5V665.5H614L611 678.5L593 685L589 688.5L593 695.5L578.5 703.5L574.5 692.5L583.5 688.5Z'},
-        {id:'street-2',fill:'#D2DCD1',hasInfo:false,d:'M761.5 664L752.5 660.5L757.5 653.5H763.5L766 649L783 646.5L789 638H797.5V641.5L801 643.5L810.5 641.5L813 645.5L816 643.5L821 644L825 649.5V656L826.5 662L829 665L826 669.5V675H821L820.5 678.5L816.5 679V682.5L809.5 687V692H780.5L778.5 673H772V666.5L765.5 664V658.5L761.5 657V664Z'},
-        {id:'street-3',fill:'#F1E5CF',hasInfo:false,d:'M832.5 580.5L821 585L823 613.5H809.5L809 638H797.5V641.5L801 643.5L810.5 641.5L813 645.5L816 643.5L821.5 644.5L825 649.5V656L826 662L829.5 664.5L859 662.5V655.5L862 652L868 642.5V604L866 602.5L849.5 586.5L850.5 585L854 579.5L845 567L839.5 575.5L832.5 580.5Z'},
-        {id:'street-4',fill:'#D1DFCE',hasInfo:false,d:'M873.5 545.5L838.5 559L854 579.5L849.5 586.5L868 604V643L859 655.5V663L860.5 666L877 664.5L876.5 657.5L869 657V650L870 649L877 638L902 565L908.5 551.5V545.5H873.5Z'},
-        {id:'street-5',fill:'#E8D2D5',hasInfo:false,d:'M860.5 410L851 418.5L850.5 420L916.5 531L966 523L962 512L968.5 507.5L962 479L945.5 486L942.5 470L929 469.5V479H924.5V472.5H910.5L903.5 466.5L901 469.5V472.5L894 475L894.5 460L892.5 457L891 446.5L894 441V439H886.5V427.5L883 425V418.5L882 412.5L880.5 405.5H876.5L869.5 407L860.5 410Z'},
-      ],
+    allLabels:[
+      {id:'wanshoulu',       name:'万寿路街道',   cx:721, cy:1001,fs:12,hw:34},
+      {id:'yangfangdian',    name:'羊坊店街道',   cx:808, cy:1017,fs:12,hw:34},
+      {id:'ganjiakou',       name:'甘家口街道',   cx:822, cy:932, fs:12,hw:34},
+      {id:'balizhuang',      name:'八里庄街道',   cx:736, cy:909, fs:12,hw:34},
+      {id:'zizhuyuan',       name:'紫竹院街道',   cx:795, cy:831, fs:12,hw:34},
+      {id:'beitaipingzhuang',name:'北太平庄街道', cx:939, cy:796, fs:11,hw:38},
+      {id:'haidian',         name:'海淀街道',     cx:772, cy:741, fs:12,hw:26},
+      {id:'zhongguancun',    name:'中关村街道',   cx:850, cy:717, fs:12,hw:34},
+      {id:'xueyuanlu',       name:'学院路街道',   cx:929, cy:638, fs:12,hw:34},
+      {id:'qinghe',          name:'清河街道',     cx:846, cy:480, fs:12,hw:26},
+      {id:'qinglongqiao',    name:'青龙桥街道',   cx:687, cy:606, fs:11,hw:34},
+      {id:'xiangshan',       name:'香山街道',     cx:447, cy:644, fs:12,hw:26},
+      {id:'xisanqi',         name:'西三旗街道',   cx:951, cy:400, fs:11,hw:34},
+      {id:'walianwa',        name:'马连洼街道',   cx:688, cy:505, fs:12,hw:34},
+      {id:'huayuanlu',       name:'花园路街道',   cx:951, cy:724, fs:11,hw:34},
+      {id:'tiancunlu',       name:'田村路街道',   cx:594, cy:932, fs:11,hw:34},
+      {id:'shangdi',         name:'上地街道',     cx:772, cy:498, fs:12,hw:26},
+      {id:'shuguang',        name:'曙光街道',     cx:714, cy:813, fs:12,hw:26},
+      {id:'yongdinlu',       name:'永定路街道',   cx:651, cy:990, fs:11,hw:34},
+      {id:'dongshengzhen',   name:'东升镇',       cx:968, cy:471, fs:12,hw:20},
+      {id:'sijiqing',        name:'四季青镇',     cx:573, cy:785, fs:12,hw:26},
+      {id:'xibeiwang',       name:'西北旺镇',     cx:596, cy:387, fs:12,hw:26},
+      {id:'wenquanzhen',     name:'温泉镇',       cx:391, cy:472, fs:12,hw:20},
+      {id:'sujiatuo',        name:'苏家坨镇',     cx:213, cy:322, fs:12,hw:26},
+      {id:'shangzhuangzhen', name:'上庄镇',       cx:471, cy:166, fs:12,hw:20},
+      {id:'beixiaguan',      name:'北下关街道',   cx:872, cy:816, fs:11,hw:34},
+      {id:'haidianzhen',     name:'海淀镇',       cx:728, cy:693, fs:11,hw:20},
+    ],
 
-      // 全部27个有星标注（25个有信息 + 北下关 + 海淀镇）
-      // cx,cy = 精确polygon centroid
-      // hw = 文字半宽估算 = 字数 × 字号px × 0.56 / 2
-      // 星中心 x = -hw - 9  (在 translate(cx,cy) 坐标系里)
-      // 文字左端 x = -hw + 1
-      allLabels: [
-        {id:'wanshoulu',       name:'万寿路街道',   cx:721, cy:1001,fs:12,hw:34},
-        {id:'yangfangdian',    name:'羊坊店街道',   cx:808, cy:1017,fs:12,hw:34},
-        {id:'ganjiakou',       name:'甘家口街道',   cx:822, cy:932, fs:12,hw:34},
-        {id:'balizhuang',      name:'八里庄街道',   cx:736, cy:909, fs:12,hw:34},
-        {id:'zizhuyuan',       name:'紫竹院街道',   cx:795, cy:831, fs:12,hw:34},
-        {id:'beitaipingzhuang',name:'北太平庄街道', cx:939, cy:796, fs:11,hw:38},
-        {id:'haidian',         name:'海淀街道',     cx:772, cy:741, fs:12,hw:26},
-        {id:'zhongguancun',    name:'中关村街道',   cx:850, cy:717, fs:12,hw:34},
-        {id:'xueyuanlu',       name:'学院路街道',   cx:929, cy:638, fs:12,hw:34},
-        {id:'qinghe',          name:'清河街道',     cx:846, cy:480, fs:12,hw:26},
-        {id:'qinglongqiao',    name:'青龙桥街道',   cx:687, cy:606, fs:11,hw:34},
-        {id:'xiangshan',       name:'香山街道',     cx:447, cy:644, fs:12,hw:26},
-        {id:'xisanqi',         name:'西三旗街道',   cx:951, cy:400, fs:11,hw:34},
-        {id:'walianwa',        name:'马连洼街道',   cx:688, cy:505, fs:12,hw:34},
-        {id:'huayuanlu',       name:'花园路街道',   cx:951, cy:724, fs:11,hw:34},
-        {id:'tiancunlu',       name:'田村路街道',   cx:594, cy:932, fs:11,hw:34},
-        {id:'shangdi',         name:'上地街道',     cx:772, cy:498, fs:12,hw:26},
-        {id:'shuguang',        name:'曙光街道',     cx:714, cy:813, fs:12,hw:26},
-        {id:'yongdinlu',       name:'永定路街道',   cx:651, cy:990, fs:11,hw:34},
-        {id:'dongshengzhen',   name:'东升镇',       cx:968, cy:471, fs:12,hw:20},
-        {id:'sijiqing',        name:'四季青镇',     cx:573, cy:785, fs:12,hw:26},
-        {id:'xibeiwang',       name:'西北旺镇',     cx:596, cy:387, fs:12,hw:26},
-        {id:'wenquanzhen',     name:'温泉镇',       cx:391, cy:472, fs:12,hw:20},
-        {id:'sujiatuo',        name:'苏家坨镇',     cx:213, cy:322, fs:12,hw:26},
-        {id:'shangzhuangzhen', name:'上庄镇',       cx:471, cy:166, fs:12,hw:20},
-        // 以下两个无详细信息，但原图有星标
-        {id:'beixiaguan',      name:'北下关街道',   cx:872, cy:816, fs:11,hw:34},
-        {id:'haidianzhen',     name:'海淀镇',       cx:728, cy:693, fs:11,hw:20},
-      ],
-
-      info:{
-        'street-1-wanshoulu':        {name:'万寿路街道复兴党群服务中心',       address:'海淀区太平路5号（中元国际南门对面）',          hours:'9:00–17:30',              contact:'李 珠',  phone:'68213678'},
-        'street-2-yangfangdian':     {name:'羊坊店街道党群服务中心',           address:'海淀区复兴路23号城乡集团写字楼8009室',        hours:'9:00–11:30  13:30–17:00', contact:'卢 玨',  phone:'68298260'},
-        'street-3-ganjiakou':        {name:'甘家口街道党群服务中心',           address:'海淀区车公庄西路花园村甲10号',                hours:'9:00–11:30  14:00–17:00', contact:'邓竹钧', phone:'68470827'},
-        'street-4-balizhuang':       {name:'八里庄街道党群服务中心',           address:'海淀区皂成路97号',                           hours:'8:00–19:00',              contact:'周天宇', phone:'19568713671'},
-        'street-5-zizhuyuan':        {name:'紫竹院街道党群服务中心',           address:'海淀区厂洼东二街（中元国际南门对面）',        hours:'9:00–17:30',              contact:'王 超',  phone:'68469707'},
-        'street-6-beitaipingzhuang': {name:'北太平庄街道党群服务中心',         address:'海淀区北太平庄街道志强北社区内汉庭酒店东侧',  hours:'9:00–17:30',              contact:'荷 馨',  phone:'82219398'},
-        'street-7-haidian':          {name:'海淀街道红帆党群服务中心',         address:'海淀区中关村大街11号中关村e世界C座',          hours:'9:00–17:30',              contact:'张 磊',  phone:'62627080'},
-        'street-8-zhongguancun':     {name:'中关村街道党群服务中心',           address:'海淀区中关村东路66号世纪科贸大厦B座三层',    hours:'9:00–17:00',              contact:'陈玉兰', phone:'62670200'},
-        'street-9-xueyuanlu':        {name:'学院路街道钻石共生大院党群服务中心',address:'海淀区学院路20号1号楼',                     hours:'8:30–20:30  9:00–21:00',  contact:'李李桃', phone:'18600879615'},
-        'street-10-qinghe':          {name:'清河街道红桥党群服务中心',         address:'海淀区小营西路和服中心A座3层',                hours:'9:00–17:30',              contact:'刘 羽',  phone:'18518331739'},
-        'street-11-qinglongqiao':    {name:'青龙桥街道红肪党群服务中心',       address:'海淀区红山口8号青龙企业园A座3层',            hours:'9:00–17:30',              contact:'王传秀', phone:'62882213'},
-        'street-12-xiangshan':       {name:'香山街道党群服务中心',             address:'海淀区香山一棵松2号',                        hours:'9:00–11:30  14:00–17:30', contact:'李心仪', phone:'62591385'},
-        'street-13-xisanqi':         {name:'西三旗街道旗领党群服务中心',       address:'海淀区西三旗街道永泰中路50号楼',              hours:'9:00–17:00',              contact:'丁梦思', phone:'68562140'},
-        'street-14-walianwa':        {name:'马连洼街道红杉党群服务中心',       address:'海淀区西北东路10号院15号楼1001室',            hours:'9:00–17:30',              contact:'胡玉菊', phone:'62810630'},
-        'street-15-huayuanlu':       {name:'花园路街道党群服务中心',           address:'海淀区花园北路46号',                         hours:'9:00–17:00',              contact:'贾四平', phone:'62352026'},
-        'street-16-tiancunlu':       {name:'田村路街道党群服务中心',           address:'海淀区西四环北路137号',                      hours:'9:00–11:30  14:00–17:30', contact:'赵 青',  phone:'88155221'},
-        'street-17-shangdi':         {name:'上地街道党群服务中心',             address:'海淀区宏通大厦6通道一层',                    hours:'周一至周五 14:00–17:30',  contact:'胡雪莹', phone:'82177292'},
-        'street-18-shuguang':        {name:'曙光街道党群服务中心',             address:'海淀区曙光街道善缘精路世纪文化下沉广场',      hours:'9:00–17:30',              contact:'冀 菁',  phone:'88859323'},
-        'street-19-yongdinlu':       {name:'永定路街道党群服务中心',           address:'海淀区永定路85号院内',                       hours:'9:00–17:00',              contact:'刘 芳',  phone:'18701612190'},
-        'street-20-dongshengzhen':   {name:'东升镇宏声党群服务中心',           address:'海淀区新花园西路99号院1号楼',                hours:'9:00–17:30',              contact:'赵 僅',  phone:'82619027'},
-        'street-21-sijiqing':        {name:'四季青镇党群服务中心',             address:'海淀区四季青镇杏石口路65号益园文创基地C区6号',hours:'9:00–11:30  13:30–17:30', contact:'刘文志', phone:'88465288'},
-        'street-22-xibeiwang':       {name:'西北旺镇党群服务中心',             address:'海淀区西北旺镇家麒新城T0918号楼直营',        hours:'9:00–12:00  14:00–17:00', contact:'孙 倩',  phone:''},
-        'street-23-wenquanzhen':     {name:'温泉镇党群服务中心',               address:'海淀区温泉镇温泉宝家园7号楼二层',            hours:'8:30–12:30  13:30–17:30', contact:'彭艳玲', phone:'15201194657'},
-        'street-24-sujiatuo':        {name:'苏家坨镇党群服务中心',             address:'海淀区苏家坨镇安河家园八里15号楼直营',       hours:'9:00–11:30  14:00–17:30', contact:'张海燕', phone:'17801600905'},
-        'street-25-shangzhuangzhen': {name:'上庄镇党群服务中心',               address:'海淀区上庄路60号',                           hours:'8:30–17:00',              contact:'朱怀励', phone:'18811671267'},
-      },
-    }
-  },
+    info:{
+      'street-1-wanshoulu':        {name:'万寿路街道复兴党群服务中心',       address:'海淀区太平路5号（中元国际南门对面）',          hours:'9:00–17:30',              contact:'李 珠',  phone:'68213678'},
+      'street-2-yangfangdian':     {name:'羊坊店街道党群服务中心',           address:'海淀区复兴路23号城乡集团写字楼8009室',        hours:'9:00–11:30  13:30–17:00', contact:'卢 玨',  phone:'68298260'},
+      'street-3-ganjiakou':        {name:'甘家口街道党群服务中心',           address:'海淀区车公庄西路花园村甲10号',                hours:'9:00–11:30  14:00–17:00', contact:'邓竹钧', phone:'68470827'},
+      'street-4-balizhuang':       {name:'八里庄街道党群服务中心',           address:'海淀区皂成路97号',                           hours:'8:00–19:00',              contact:'周天宇', phone:'19568713671'},
+      'street-5-zizhuyuan':        {name:'紫竹院街道党群服务中心',           address:'海淀区厂洼东二街（中元国际南门对面）',        hours:'9:00–17:30',              contact:'王 超',  phone:'68469707'},
+      'street-6-beitaipingzhuang': {name:'北太平庄街道党群服务中心',         address:'海淀区北太平庄街道志强北社区内汉庭酒店东侧',  hours:'9:00–17:30',              contact:'荷 馨',  phone:'82219398'},
+      'street-7-haidian':          {name:'海淀街道红帆党群服务中心',         address:'海淀区中关村大街11号中关村e世界C座',          hours:'9:00–17:30',              contact:'张 磊',  phone:'62627080'},
+      'street-8-zhongguancun':     {name:'中关村街道党群服务中心',           address:'海淀区中关村东路66号世纪科贸大厦B座三层',    hours:'9:00–17:00',              contact:'陈玉兰', phone:'62670200'},
+      'street-9-xueyuanlu':        {name:'学院路街道钻石共生大院党群服务中心',address:'海淀区学院路20号1号楼',                     hours:'8:30–20:30  9:00–21:00',  contact:'李李桃', phone:'18600879615'},
+      'street-10-qinghe':          {name:'清河街道红桥党群服务中心',         address:'海淀区小营西路和服中心A座3层',                hours:'9:00–17:30',              contact:'刘 羽',  phone:'18518331739'},
+      'street-11-qinglongqiao':    {name:'青龙桥街道红肪党群服务中心',       address:'海淀区红山口8号青龙企业园A座3层',            hours:'9:00–17:30',              contact:'王传秀', phone:'62882213'},
+      'street-12-xiangshan':       {name:'香山街道党群服务中心',             address:'海淀区香山一棵松2号',                        hours:'9:00–11:30  14:00–17:30', contact:'李心仪', phone:'62591385'},
+      'street-13-xisanqi':         {name:'西三旗街道旗领党群服务中心',       address:'海淀区西三旗街道永泰中路50号楼',              hours:'9:00–17:00',              contact:'丁梦思', phone:'68562140'},
+      'street-14-walianwa':        {name:'马连洼街道红杉党群服务中心',       address:'海淀区西北东路10号院15号楼1001室',            hours:'9:00–17:30',              contact:'胡玉菊', phone:'62810630'},
+      'street-15-huayuanlu':       {name:'花园路街道党群服务中心',           address:'海淀区花园北路46号',                         hours:'9:00–17:00',              contact:'贾四平', phone:'62352026'},
+      'street-16-tiancunlu':       {name:'田村路街道党群服务中心',           address:'海淀区西四环北路137号',                      hours:'9:00–11:30  14:00–17:30', contact:'赵 青',  phone:'88155221'},
+      'street-17-shangdi':         {name:'上地街道党群服务中心',             address:'海淀区宏通大厦6通道一层',                    hours:'周一至周五 14:00–17:30',  contact:'胡雪莹', phone:'82177292'},
+      'street-18-shuguang':        {name:'曙光街道党群服务中心',             address:'海淀区曙光街道善缘精路世纪文化下沉广场',      hours:'9:00–17:30',              contact:'冀 菁',  phone:'88859323'},
+      'street-19-yongdinlu':       {name:'永定路街道党群服务中心',           address:'海淀区永定路85号院内',                       hours:'9:00–17:00',              contact:'刘 芳',  phone:'18701612190'},
+      'street-20-dongshengzhen':   {name:'东升镇宏声党群服务中心',           address:'海淀区新花园西路99号院1号楼',                hours:'9:00–17:30',              contact:'赵 僅',  phone:'82619027'},
+      'street-21-sijiqing':        {name:'四季青镇党群服务中心',             address:'海淀区四季青镇杏石口路65号益园文创基地C区6号',hours:'9:00–11:30  13:30–17:30', contact:'刘文志', phone:'88465288'},
+      'street-22-xibeiwang':       {name:'西北旺镇党群服务中心',             address:'海淀区西北旺镇家麒新城T0918号楼直营',        hours:'9:00–12:00  14:00–17:00', contact:'孙 倩',  phone:''},
+      'street-23-wenquanzhen':     {name:'温泉镇党群服务中心',               address:'海淀区温泉镇温泉宝家园7号楼二层',            hours:'8:30–12:30  13:30–17:30', contact:'彭艳玲', phone:'15201194657'},
+      'street-24-sujiatuo':        {name:'苏家坨镇党群服务中心',             address:'海淀区苏家坨镇安河家园八里15号楼直营',       hours:'9:00–11:30  14:00–17:30', contact:'张海燕', phone:'17801600905'},
+      'street-25-shangzhuangzhen': {name:'上庄镇党群服务中心',               address:'海淀区上庄路60号',                           hours:'8:30–17:00',              contact:'朱怀励', phone:'18811671267'},
+    },
+  }},
   methods:{
-    // 五角星顶点，cx/cy为中心
     starPts(cx,cy,r1,r2){
       const p=[];
       for(let i=0;i<10;i++){
@@ -289,7 +537,7 @@ createApp({
     },
     open(id){const d=this.info[id];if(d)this.active=d},
     close(){this.active=null},
-    call(phone){if(phone)window.location.href='tel:'+phone},
+    call(p){if(p)window.location.href='tel:'+p},
   }
 }).mount('#app');
 </script>
